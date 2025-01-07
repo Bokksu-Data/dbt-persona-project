@@ -1,6 +1,12 @@
 # Persona Project 
 
+# Owners: 
 
+HI my name is Savana
+
+Hi!! ~Ayesha
+
+## Ayesha Zaker
 
 HI my name is Sanskriti
 
@@ -11,7 +17,7 @@ HI my name is Sabirah
 
 HI my name is Savana 
 
-# Owners: 
+
 
 ## Savana Hughes
 
