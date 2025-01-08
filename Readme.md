@@ -1,25 +1,19 @@
 # Persona Project 
 
-# Owners: 
+## Owners: 
 
-HI my name is Savana
+### Ayesha Zaker
+Hi my name is Ayesha 
 
-Hi!! ~Ayesha
-
-## Ayesha Zaker
-
+### Sanskriti Khadka
 HI my name is Sanskriti
 
-## Sanskriti Khadka
+### Sabirah Habib
 HI my name is Sabirah
 
-## Sabirah Habib
+### Mayesha Fahmida
+Hi my name is Mayesha
 
+### Savana Hughes
 HI my name is Savana 
-
-## Mayesha Fahmida
-
-
-
-## Savana Hughes
 
