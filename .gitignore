@@ -1,3 +1,12 @@
 .DS_Store
 /.DS_Store
 venv/
+dbt_persona/profiles/
+dbt_persona/.DS_Store
+dbt_persona/target
+dbt_persona/dbt_packages/
+dbt_persona/logs/
+dbt_persona/.env
+.github/.DS_Store
+.vscode/
+.idea
