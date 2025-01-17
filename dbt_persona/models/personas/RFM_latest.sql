@@ -11,7 +11,7 @@ WITH rfm_segments AS(
 current_segments AS(
 	SELECT *
 	FROM rfm_segments
-	WHERE date_day = (SELECT MAX(date_day) FROM rfm_segments)
+	WHERE date_month = (SELECT MAX(date_month) FROM rfm_segments)
 )
 SELECT *
 FROM current_segments

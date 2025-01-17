@@ -38,5 +38,4 @@
     )
 }}
 
-{{ dbt_date.get_date_dimension("2016-01-01", "2050-01-16") }}
-
+{{ dbt_date.get_date_dimension("2019-01-01", "2027-01-01") }}

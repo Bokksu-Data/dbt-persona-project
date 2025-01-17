@@ -3,6 +3,8 @@
         materialized = "table"
     )
 }}
+-- Year_Number + Month of Year
+
 /*
 COMPOSITE_CUSTOMER_ID = user_id (Unique identifier for each user or customer)
 CREATED_AT_EST = payment_date (Date of each customer's payment)
@@ -13,42 +15,42 @@ TOTAL_NET_REVENUE = payment_amount (Transacted amount of each payment)
 with payments as (
     select COMPOSITE_CUSTOMER_ID as user_id, CREATED_AT_EST::date as payment_date, COMPOSITE_ORDER_ID as payment_id, TOTAL_NET_REVENUE as payment_amount
     from BOKKSU._CORE.FCT__ALL__ORDERS
-), -- Queries calendar table and selects the date_day column
-days AS( 
-	SELECT CURRENT_DATE AS date_day
+), 
+months AS( -- Queries calendar table and selects the date_month column
+	SELECT CURRENT_DATE AS date_month
     UNION ALL
-    SELECT DISTINCT DATE_DAY AS date_day
+    SELECT DISTINCT MONTH_START_DATE AS date_month
     FROM {{ref('dim_calendar')}}
 ), 
-payments_with_days AS(
+payments_with_months AS(
     SELECT  user_id,
-            date_day,
+            date_month,
             payment_date,
             payment_id,
             payment_amount
-    FROM days
-        JOIN payments ON payment_date <= date_day
+    FROM months
+        JOIN payments ON payment_date <= date_month
 ),
 /*
  max_payment_date (Last payment date of each user. We keep it for auditing)
- recency (Days that passed between the last transaction of each user and today)
+ recency (Months that passed between the last transaction of each user and today)
  frequency (Quantity of user transactions in the analyzed window)
  monetary (Transacted amount by the user in the analyzed window)
 */
 -- Calculate the RFM for each user
 rfm_values AS (
     SELECT  user_id, 
-            date_day,
+            date_month,
             MAX(payment_date) AS max_payment_date,
-            CURRENT_DATE - MAX(payment_date) AS recency,
+            date_month - MAX(payment_date) AS recency,
             COUNT(DISTINCT payment_id) AS frequency,
             SUM(payment_amount) AS monetary
-    FROM payments_with_days
-    GROUP BY user_id, date_day
+    FROM payments_with_months
+    GROUP BY user_id, date_month
 ), -- Dividing Users based on RFM values
 rfm_percentiles AS (
     SELECT  user_id,
-            date_day,
+            date_month,
             recency,
             frequency,
             monetary,
@@ -81,7 +83,7 @@ rfm_scores AS(
                 ELSE 1
                 END AS monetary_score
     FROM rfm_percentiles
-), -- Segment users by Frequency and Recency scores based on proposed R-F matrix
+), -- Segment users by Frequency, Recency, Monetary scores based on proposed R-F matrix
 rfm_segment AS(
 SELECT *,
         CASE
@@ -108,6 +110,13 @@ SELECT *,
             ELSE 'Champions'
         END AS rfm_segment
 FROM  rfm_scores
+),
+rfm_score AS(
+    SELECT *,
+        CONCAT(CONCAT(recency_score, frequency_score), monetary_score) AS rfm_score,
+        frequency_score * SQRT(monetary_score) /  recency_score AS rfm_score_value
+    FROM rfm_segment
 )
+
 SELECT *
-FROM rfm_segment
+FROM rfm_score
