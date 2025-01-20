@@ -10,3 +10,5 @@ dbt_persona/.env
 .github/.DS_Store
 .vscode/
 .idea
+logs/
+dbt_persona/logs/
