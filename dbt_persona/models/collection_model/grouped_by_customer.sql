@@ -19,21 +19,10 @@ FROM bokksu._core.fct__all__lineitems l LEFT JOIN flavor_categories fc ON l.comp
 
 --filtering
 WHERE 
-fc.collection_title != 'ALL' and 
-fc.collection_title not like 'ALL%' and 
-fc.collection_title not like '%SUBSCRIPTIONS%' and 
-fc.collection_title not like '%SUBSCRIPTION%' and  
-fc.collection_title NOT LIKE '%BOX%' AND 
-fc.collection_title NOT LIKE '%1-MONTH%' AND 
-fc.collection_title NOT LIKE '%HOME PAGE%' and 
-fc.collection_title NOT LIKE '%PREORDER%' AND 
-fc.collection_title NOT LIKE '%JAPAN CRATE%'
 
-and 
 l.cancelled_at_est is null and 
 l.lineitem_net_revenue_at_quantity > 0 and 
-l.composite_customer_id IS NOT NULL and 
-(fc.lineitem_type = 'SM' OR fc.lineitem_type like 'MKT%' OR fc.lineitem_type like 'BTQ%')
+l.composite_customer_id IS NOT NULL 
 
 GROUP BY l.composite_customer_id, fc.collection_title, flavors, brand_name
 )
