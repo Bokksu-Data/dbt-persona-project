@@ -1,0 +1,1 @@
+{{create_dim_rfm('int__rfm_by_month_by_brand')}}
