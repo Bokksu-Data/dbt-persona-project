@@ -1,15 +1,9 @@
 {{ config(materialized='table') }}
 
 WITH flavor_categories AS (
-SELECT 
-    p.composite_product_variant_id, 
-    p.flavor_type, 
-    p.lineitem_type,
-    TRIM(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(u.collection_title, '(QUIZ)', ''),'JANUARY', ''),'FEBRUARY', ''),'MARCH', ''),'APRIL', ''),'MAY', ''),'JUNE', ''),'JULY', ''),'AUGUST', ''),'SEPTEMBER', ''),'OCTOBER', ''),'NOVEMBER', ''),'DECEMBER', ''),'+', ''),'.', ''),':', ''),'0', ''),'1', ''),'2', ''),'3', ''),'4', ''),'5', ''),'6', ''),'7', ''),'8', ''),'9', '')) as collection_title,
-    p.flavor_type as flavor
-FROM BOKKSU._core.dim__all__products p 
-LEFT JOIN BOKKSU._OPERATIONS.DIM_UNIVERSAL_PRODUCTS_COLLECTIONS u ON p.composite_product_variant_id = u.composite_product_variant_id
-WHERE p.flavor_type IS NOT NULL
+
+SELECT * from ref{{('int__collection_cleaning')}}
+
 ),
 
 collection_performance AS (
