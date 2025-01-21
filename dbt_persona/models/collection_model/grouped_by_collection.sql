@@ -18,19 +18,10 @@ SELECT
     MAX(l.CREATED_AT_EST::date) as most_recent_order_date
 FROM bokksu._core.fct__all__lineitems l 
 LEFT JOIN flavor_categories fc ON l.composite_product_variant_id = fc.composite_product_variant_id
-WHERE fc.collection_title != 'ALL'
-AND fc.collection_title not like 'ALL%'
-AND fc.collection_title not like '%SUBSCRIPTIONS%'
-AND fc.collection_title not like '%SUBSCRIPTION%'
-AND fc.collection_title NOT LIKE '%BOX%'
-AND fc.collection_title NOT LIKE '%1-MONTH%'
-AND fc.collection_title NOT LIKE '%HOME PAGE%'
-AND fc.collection_title NOT LIKE '%PREORDER%'
-AND fc.collection_title NOT LIKE '%JAPAN CRATE%'
-AND l.cancelled_at_est is null
+WHERE l.cancelled_at_est is null
 AND l.lineitem_net_revenue_at_quantity > 0
 AND l.composite_customer_id IS NOT NULL
-AND (l.lineitem_type = 'SM' OR l.lineitem_type like 'MKT%' OR l.lineitem_type like 'BTQ%')
+AND 
 GROUP BY fc.collection_title, flavors, brand_name
 )
 
