@@ -100,3 +100,5 @@ rfm_score AS
 
 SELECT *
 FROM rfm_score
+
+{%- endmacro %}

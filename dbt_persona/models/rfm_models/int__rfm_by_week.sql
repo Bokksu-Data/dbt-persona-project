@@ -4,7 +4,6 @@
     )
 }}
 -- Year_Number + Month of Year
-
 /*
 COMPOSITE_CUSTOMER_ID = user_id (Unique identifier for each user or customer)
 CREATED_AT_EST = payment_date (Date of each customer's payment)
@@ -13,21 +12,19 @@ TOTAL_NET_REVENUE = payment_amount (Transacted amount of each payment)
 */
 -- Loading payments data
 with payments as (
-    select 
-        COMPOSITE_CUSTOMER_ID as user_id, 
-        CREATED_AT_EST::date as payment_date, 
-        COMPOSITE_ORDER_ID as payment_id, 
+    select
+        COMPOSITE_CUSTOMER_ID as user_id,
+        CREATED_AT_EST::date as payment_date,
+        COMPOSITE_ORDER_ID as payment_id,
         TOTAL_NET_REVENUE as payment_amount
     from BOKKSU._CORE.FCT__ALL__ORDERS
-), 
-
+),
 months AS( -- Queries calendar table and selects the date_week column
     SELECT DISTINCT WEEK_START_DATE::date AS date_week
     FROM {{ref('dim__calendar')}}
     where WEEK_START_DATE <= date_trunc('week', current_date)
     and WEEK_START_DATE >= '2018-12-30'
 ),
-
 payments_with_months AS(
     SELECT  user_id,
             date_week,
@@ -37,7 +34,6 @@ payments_with_months AS(
     FROM months
         JOIN payments ON date_trunc('week', payment_date) <= date_week
 ),
-
 -- select * from payments_with_months
 /*
  max_payment_date (Last payment date of each user. We keep it for auditing)
@@ -47,7 +43,7 @@ payments_with_months AS(
 */
 -- Calculate the RFM for each user
 rfm_values AS (
-    SELECT  user_id, 
+    SELECT  user_id,
             date_week,
             MAX(payment_date) AS max_payment_date,
             date_week - MAX(date_trunc('week', payment_date)) AS recency,
@@ -55,8 +51,7 @@ rfm_values AS (
             SUM(payment_amount) AS monetary
     FROM payments_with_months
     GROUP BY user_id, date_week
-), 
-
+),
 -- Dividing Users based on RFM values
 rfm_percentiles AS (
     SELECT  user_id,
@@ -69,55 +64,6 @@ rfm_percentiles AS (
             PERCENT_RANK() OVER (ORDER BY frequency ASC) AS frequency_percentile,
             PERCENT_RANK() OVER (ORDER BY monetary ASC) AS monetary_percentile
     FROM rfm_values
-), 
-
--- Assigns score to each RFM value to each user
-rfm_scores AS(
-    SELECT  *,
-            CASE
-                WHEN recency_percentile >= 0.8 THEN 5
-                WHEN recency_percentile >= 0.6 THEN 4
-                WHEN recency_percentile >= 0.4 THEN 3
-                WHEN recency_percentile >= 0.2 THEN 2
-                ELSE 1
-                END AS recency_score,
-            CASE
-                WHEN frequency_percentile >= 0.8 THEN 5
-                WHEN frequency_percentile >= 0.6 THEN 4
-                WHEN frequency_percentile >= 0.4 THEN 3
-                WHEN frequency_percentile >= 0.2 THEN 2
-                ELSE 1
-                END AS frequency_score,
-            CASE
-                WHEN monetary_percentile >= 0.8 THEN 5
-                WHEN monetary_percentile >= 0.6 THEN 4
-                WHEN monetary_percentile >= 0.4 THEN 3
-                WHEN monetary_percentile >= 0.2 THEN 2
-                ELSE 1
-                END AS monetary_score,
-                
-            CASE
-                WHEN recency_percentile >= 0.8 THEN 1
-                WHEN recency_percentile >= 0.6 THEN 2
-                WHEN recency_percentile >= 0.4 THEN 3
-                WHEN recency_percentile >= 0.2 THEN 4
-                ELSE 5
-                END AS recency_score_inverse,
-            CASE
-                WHEN frequency_percentile >= 0.8 THEN 1
-                WHEN frequency_percentile >= 0.6 THEN 2
-                WHEN frequency_percentile >= 0.4 THEN 3
-                WHEN frequency_percentile >= 0.2 THEN 4
-                ELSE 5
-                END AS frequency_score_inverse,
-            CASE
-                WHEN monetary_percentile >= 0.8 THEN 1
-                WHEN monetary_percentile >= 0.6 THEN 2
-                WHEN monetary_percentile >= 0.4 THEN 3
-                WHEN monetary_percentile >= 0.2 THEN 4
-                ELSE 5
-                END AS monetary_score_inverse
-    FROM rfm_percentiles
 )
 
-select * from rfm_scores
+select * from rfm_percentiles
