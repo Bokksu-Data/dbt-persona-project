@@ -34,7 +34,7 @@ payments_with_months AS(
             payment_id,
             payment_amount
     FROM months
-        JOIN payments ON date_trunc('month', payment_date) <= date_month
+        JOIN payments ON date_trunc('month', payment_date) <= date_month 
 ),
 
 -- select * from payments_with_months
