@@ -6,7 +6,7 @@
 
 WITH rfm_segments AS(
 	SELECT *
-	FROM {{ref('RFM_model')}}
+	FROM {{ref('dim__rfm_by_month')}}
 ),	
 current_segments AS(
 	SELECT *
