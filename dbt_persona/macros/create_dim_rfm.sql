@@ -1,11 +1,9 @@
 {% macro create_dim_rfm(input_model) -%}
-
 with
 int__rfm as
 (
     select * from {{ref(input_model)}}
 ),
-
 -- Assigns score to each RFM value to each user
 rfm_scores AS(
     SELECT  *,
@@ -30,7 +28,6 @@ rfm_scores AS(
                 WHEN monetary_percentile >= 0.2 THEN 2
                 ELSE 1
                 END AS monetary_score,
-
             CASE
                 WHEN recency_percentile >= 0.8 THEN 1
                 WHEN recency_percentile >= 0.6 THEN 2
@@ -52,10 +49,8 @@ rfm_scores AS(
                 WHEN monetary_percentile >= 0.2 THEN 4
                 ELSE 5
                 END AS monetary_score_inverse
-                
     FROM int__rfm
-), 
-
+),
 -- Segment users by Frequency, Recency, Monetary scores based on proposed R-F matrix
 rfm_segment AS(
 SELECT *,
@@ -84,23 +79,18 @@ SELECT *,
         END AS rfm_segment
 FROM  rfm_scores
 ),
-
 rfm_score AS
 (
     SELECT *,
         CONCAT(CONCAT(recency_score, frequency_score), monetary_score) AS rfm_score,
-        /* 
-        In this system, the deciles correspond to RFM scores of 1-10. 
-        So, an RFM score of 1 is the best and covers the top 10% of customers. 
-        Likewise, a score of 2 corresponds to 11-20%, a score of 3 corresponds to 21-30%, and so on. 
+        /*
+        In this system, the deciles correspond to RFM scores of 1-10.
+        So, an RFM score of 1 is the best and covers the top 10% of customers.
+        Likewise, a score of 2 corresponds to 11-20%, a score of 3 corresponds to 21-30%, and so on.
         */
         frequency_score_inverse * SQRT(monetary_score_inverse) /  recency_score_inverse AS rfm_score_decile --decile score
     FROM rfm_segment
 )
-
 SELECT *
 FROM rfm_score
-
-
-
 {%- endmacro %}
