@@ -100,56 +100,6 @@ rfm_percentiles AS (
         PERCENT_RANK() OVER (PARTITION BY BRAND ORDER BY frequency ASC) AS frequency_percentile,
         PERCENT_RANK() OVER (PARTITION BY BRAND ORDER BY monetary ASC) AS monetary_percentile
     FROM rfm_values
-), 
-
--- Assigns score to each RFM value to each user
-rfm_scores AS(
-    SELECT  *,
-            CASE
-                WHEN recency_percentile >= 0.8 THEN 5
-                WHEN recency_percentile >= 0.6 THEN 4
-                WHEN recency_percentile >= 0.4 THEN 3
-                WHEN recency_percentile >= 0.2 THEN 2
-                ELSE 1
-                END AS recency_score,
-            CASE
-                WHEN frequency_percentile >= 0.8 THEN 5
-                WHEN frequency_percentile >= 0.6 THEN 4
-                WHEN frequency_percentile >= 0.4 THEN 3
-                WHEN frequency_percentile >= 0.2 THEN 2
-                ELSE 1
-                END AS frequency_score,
-            CASE
-                WHEN monetary_percentile >= 0.8 THEN 5
-                WHEN monetary_percentile >= 0.6 THEN 4
-                WHEN monetary_percentile >= 0.4 THEN 3
-                WHEN monetary_percentile >= 0.2 THEN 2
-                ELSE 1
-                END AS monetary_score,
-
-            CASE
-                WHEN recency_percentile >= 0.8 THEN 1
-                WHEN recency_percentile >= 0.6 THEN 2
-                WHEN recency_percentile >= 0.4 THEN 3
-                WHEN recency_percentile >= 0.2 THEN 4
-                ELSE 5
-                END AS recency_score_inverse,
-            CASE
-                WHEN frequency_percentile >= 0.8 THEN 1
-                WHEN frequency_percentile >= 0.6 THEN 2
-                WHEN frequency_percentile >= 0.4 THEN 3
-                WHEN frequency_percentile >= 0.2 THEN 4
-                ELSE 5
-                END AS frequency_score_inverse,
-            CASE
-                WHEN monetary_percentile >= 0.8 THEN 1
-                WHEN monetary_percentile >= 0.6 THEN 2
-                WHEN monetary_percentile >= 0.4 THEN 3
-                WHEN monetary_percentile >= 0.2 THEN 4
-                ELSE 5
-                END AS monetary_score_inverse
-
-    FROM rfm_percentiles
 )
 
-select * from rfm_scores
+select * from rfm_percentiles
