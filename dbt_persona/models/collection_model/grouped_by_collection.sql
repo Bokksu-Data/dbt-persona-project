@@ -2,7 +2,7 @@
 
 WITH flavor_categories AS (
 
-SELECT * from ref{{('int__collection_cleaning')}}
+SELECT * from {{ref('int__collection_cleaning')}}
 
 ),
 
