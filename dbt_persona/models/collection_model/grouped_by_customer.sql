@@ -13,9 +13,10 @@ customer_collections AS (
 SELECT 
 l.composite_customer_id, 
 l.composite_product_variant_id,
+l.lineitem_name as product_name,
 l.lineitem_sku,
 brand,
-flavor_type,
+flavor,
 p.COLLECTION_NAMES_ARRAY,
 
 COUNT(DISTINCT l.composite_order_id) as total_orders,
@@ -30,12 +31,12 @@ LEFT JOIN products as p ON l.composite_product_variant_id = p.composite_product_
 
 --filtering
 WHERE 
-
+brand in ('SGM', 'MKT', 'BTQ') and
 l.cancelled_at_est is null and 
 l.lineitem_net_revenue_at_quantity > 0 and 
 l.composite_customer_id IS NOT NULL 
 
-GROUP BY 1,2,3,4,5,6
+GROUP BY 1,2,3,4,5,6,7
 )
 
 select * from customer_collections

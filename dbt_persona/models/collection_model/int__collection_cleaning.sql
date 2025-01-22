@@ -27,7 +27,7 @@ SELECT
 distinct 
 p.COMPOSITE_PRODUCT_ID,
 p.composite_product_variant_id, 
-p.flavor_type, 
+--p.flavor_type, 
 p.lineitem_type,
 p.flavor_type as flavor,
 p.final_pl_type as brand
@@ -53,9 +53,9 @@ select
 p.COMPOSITE_PRODUCT_ID,
 p.composite_product_variant_id,
 brand, 
-p.flavor_type, 
+--p.flavor_type, 
 p.lineitem_type,
-p.flavor_type as flavor,
+flavor,
 COLLECTION_ID_ARRAY,
 case
     when c.COLLECTION_NAMES_ARRAY is null
