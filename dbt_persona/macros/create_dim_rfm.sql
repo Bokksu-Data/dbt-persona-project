@@ -1,4 +1,9 @@
 {% macro create_dim_rfm(input_model) -%}
+{{
+    config(
+        materialized = "table"
+    )
+}}
 with
 int__rfm as
 (

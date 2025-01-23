@@ -17,6 +17,8 @@ SELECT
     fc.COLLECTION_NAMES_ARRAY,
     fc.flavor,
     fc.brand,
+    fc.product_cost,
+    fc.product_price,
     COUNT(DISTINCT l.composite_customer_id) as unique_customers,
     COUNT(DISTINCT l.composite_order_id) as total_orders,
     SUM(l.lineitem_quantity) as total_units_sold,
@@ -31,7 +33,7 @@ AND l.lineitem_net_revenue_at_quantity > 0
 AND l.composite_customer_id IS NOT NULL
  
 --GROUP BY fc.collection_title, flavors, brand_name
-GROUP BY 1, 2, 3, 4
+GROUP BY 1, 2, 3, 4, 5, 6, 7, 8
 
 
 )

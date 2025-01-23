@@ -27,14 +27,15 @@ SELECT
 distinct 
 p.COMPOSITE_PRODUCT_ID,
 p.composite_product_variant_id, 
+p.product_price,
+p.product_cost,
 --p.flavor_type, 
 p.lineitem_type,
 p.flavor_type as flavor,
 p.final_pl_type as brand
 
-FROM BOKKSU._core.dim__all__products as p LEFT JOIN Bokksu._operations.dim_universal_products_collections u ON p.composite_product_variant_id = u.composite_product_variant_id
-WHERE p.flavor_type IS NOT NULL
-AND  (lineitem_type = 'SM' OR lineitem_type like 'MKT%' OR lineitem_type like 'BTQ%')
+FROM BOKKSU._core.dim__all__products as p 
+where BRAND in ('SGM', 'MKT', 'BTQ')
 ),
 
 agg_collections AS (
@@ -53,10 +54,11 @@ select
 p.COMPOSITE_PRODUCT_ID,
 p.composite_product_variant_id,
 brand, 
---p.flavor_type, 
 p.lineitem_type,
 flavor,
 COLLECTION_ID_ARRAY,
+product_price,
+product_cost,
 case
     when c.COLLECTION_NAMES_ARRAY is null
     then 'No Collection'

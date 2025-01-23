@@ -1,0 +1,1 @@
+{{create_dim_rfm_product('int__rfm_by_product_by_week')}}

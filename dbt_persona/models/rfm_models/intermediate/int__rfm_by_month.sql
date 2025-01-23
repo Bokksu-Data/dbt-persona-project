@@ -4,6 +4,7 @@
     )
 }}
 -- Year_Number + Month of Year
+
 /*
 COMPOSITE_CUSTOMER_ID = user_id (Unique identifier for each user or customer)
 CREATED_AT_EST = payment_date (Date of each customer's payment)
@@ -12,28 +13,34 @@ TOTAL_NET_REVENUE = payment_amount (Transacted amount of each payment)
 */
 -- Loading payments data
 with payments as (
-    select
-        COMPOSITE_CUSTOMER_ID as user_id,
-        CREATED_AT_EST::date as payment_date,
-        COMPOSITE_ORDER_ID as payment_id,
+    select 
+        distinct
+        COMPOSITE_CUSTOMER_ID as user_id, 
+        CREATED_AT_EST::date as payment_date, 
+        COMPOSITE_ORDER_ID as payment_id, 
         TOTAL_NET_REVENUE as payment_amount
     from BOKKSU._CORE.FCT__ALL__ORDERS
-),
-months AS( -- Queries calendar table and selects the date_week column
-    SELECT DISTINCT WEEK_START_DATE::date AS date_week
+    where cancelled_at_est is null
+), 
+months AS( -- Queries calendar table and selects the date_month column
+    SELECT DISTINCT MONTH_START_DATE::date AS date_month
     FROM {{ref('dim__calendar')}}
-    where WEEK_START_DATE <= date_trunc('week', current_date)
-    and WEEK_START_DATE >= '2018-12-30'
+    where MONTH_START_DATE <= date_trunc('month', current_date)
+    and MONTH_START_DATE >= '2019-01-01'
 ),
+
 payments_with_months AS(
-    SELECT  user_id,
-            date_week,
-            payment_date,
-            payment_id,
-            payment_amount
+    SELECT  
+        distinct
+        user_id,
+        date_month,
+        payment_date,
+        payment_id,
+        payment_amount
     FROM months
-        JOIN payments ON date_trunc('week', payment_date) <= date_week
+        JOIN payments ON date_trunc('month', payment_date) <= date_month 
 ),
+
 -- select * from payments_with_months
 /*
  max_payment_date (Last payment date of each user. We keep it for auditing)
@@ -43,19 +50,20 @@ payments_with_months AS(
 */
 -- Calculate the RFM for each user
 rfm_values AS (
-    SELECT  user_id,
-            date_week,
+    SELECT  user_id, 
+            date_month,
             MAX(payment_date) AS max_payment_date,
-            date_week - MAX(date_trunc('week', payment_date)) AS recency,
+            date_month - MAX(date_trunc('month', payment_date)) AS recency,
             COUNT(DISTINCT payment_id) AS frequency,
             SUM(payment_amount) AS monetary
     FROM payments_with_months
-    GROUP BY user_id, date_week
-),
+    GROUP BY user_id, date_month
+), 
+
 -- Dividing Users based on RFM values
 rfm_percentiles AS (
     SELECT  user_id,
-            date_week,
+            date_month,
             max_payment_date,
             recency,
             frequency,

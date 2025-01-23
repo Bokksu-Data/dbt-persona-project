@@ -14,55 +14,64 @@ TOTAL_NET_REVENUE = payment_amount (Transacted amount of each payment)
 -- Loading payments data
 with payments as (
     select 
+        distinct
         COMPOSITE_CUSTOMER_ID as user_id, 
         CREATED_AT_EST::date as payment_date, 
         COMPOSITE_ORDER_ID as payment_id, 
         'SNB' as BRAND,
         PL_REVENUE as payment_amount
     from BOKKSU._CORE.FCT__SN_BOX__ORDERS
+    where cancelled_at_est is null
     union all 
     select 
+        distinct
         COMPOSITE_CUSTOMER_ID as user_id, 
         CREATED_AT_EST::date as payment_date, 
         COMPOSITE_ORDER_ID as payment_id, 
         'BTQ' as BRAND,
         PL_REVENUE as payment_amount
     from BOKKSU._CORE.FCT__BTQ__ORDERS
+    where cancelled_at_est is null
     union all
     select 
+        distinct
         COMPOSITE_CUSTOMER_ID as user_id, 
         CREATED_AT_EST::date as payment_date, 
         COMPOSITE_ORDER_ID as payment_id, 
         'MKT' as BRAND,
         PL_REVENUE as payment_amount
     from BOKKSU._CORE.FCT__MKT__ORDERS
+    where cancelled_at_est is null
     union all
     select 
+        distinct
         COMPOSITE_CUSTOMER_ID as user_id, 
         CREATED_AT_EST::date as payment_date, 
         COMPOSITE_ORDER_ID as payment_id, 
         'SGM' as BRAND,
         PL_REVENUE as payment_amount
     from BOKKSU._CORE.FCT__SM__ORDERS
+    where cancelled_at_est is null
 ), 
 
-months AS( -- Queries calendar table and selects the date_month column
-    SELECT DISTINCT MONTH_START_DATE::date AS date_month
+months AS( -- Queries calendar table and selects the date_week column
+    SELECT DISTINCT WEEK_START_DATE::date AS date_week
     FROM {{ref('dim__calendar')}}
-    where MONTH_START_DATE <= date_trunc('month', current_date)
-    and MONTH_START_DATE >= '2019-01-01'
+    where WEEK_START_DATE <= date_trunc('week', current_date)
+    and WEEK_START_DATE >= '2018-12-30'
 ),
 
 payments_with_months AS(
-    SELECT  
+    SELECT 
+        distinct 
         user_id,
         brand,
-        date_month,
+        date_week,
         payment_date,
         payment_id,
         payment_amount
     FROM months
-        JOIN payments ON date_trunc('month', payment_date) <= date_month
+        JOIN payments ON date_trunc('week', payment_date) <= date_week
 ),
 
 -- select * from payments_with_months
@@ -74,32 +83,31 @@ payments_with_months AS(
 */
 -- Calculate the RFM for each user
 rfm_values AS (
-    SELECT  
-        user_id, 
-        brand,
-        date_month,
-        MAX(payment_date) AS max_payment_date,
-        date_month - MAX(date_trunc('month', payment_date)) AS recency,
-        COUNT(DISTINCT payment_id) AS frequency,
-        SUM(payment_amount) AS monetary
+    SELECT  user_id, 
+            brand,
+            date_week,
+            MAX(payment_date) AS max_payment_date,
+            date_week - MAX(date_trunc('week', payment_date)) AS recency,
+            COUNT(DISTINCT payment_id) AS frequency,
+            SUM(payment_amount) AS monetary
     FROM payments_with_months
-    GROUP BY user_id, brand, date_month
+    GROUP BY user_id, brand, date_week
 ), 
 
 -- Dividing Users based on RFM values
 rfm_percentiles AS (
-    SELECT  
-        user_id,
-        brand,
-        date_month,
-        max_payment_date,
-        recency,
-        frequency,
-        monetary,
-        PERCENT_RANK() OVER (PARTITION BY BRAND ORDER BY recency DESC) AS recency_percentile,
-        PERCENT_RANK() OVER (PARTITION BY BRAND ORDER BY frequency ASC) AS frequency_percentile,
-        PERCENT_RANK() OVER (PARTITION BY BRAND ORDER BY monetary ASC) AS monetary_percentile
+    SELECT  user_id,
+            brand,
+            date_week,
+            max_payment_date,
+            recency,
+            frequency,
+            monetary,
+            PERCENT_RANK() OVER (PARTITION BY BRAND ORDER BY recency DESC) AS recency_percentile,
+            PERCENT_RANK() OVER (PARTITION BY BRAND ORDER BY frequency ASC) AS frequency_percentile,
+            PERCENT_RANK() OVER (PARTITION BY BRAND ORDER BY monetary ASC) AS monetary_percentile
     FROM rfm_values
 )
-
 select * from rfm_percentiles
+
+
