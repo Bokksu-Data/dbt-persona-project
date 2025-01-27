@@ -13,7 +13,3 @@ HI my name is Sabirah
 
 ### Mayesha Fahmida
 Hi my name is Mayesha
-
-### Savana Hughes
-HI my name is Savana 
-
