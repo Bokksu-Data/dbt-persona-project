@@ -1,0 +1,1 @@
+select * from bokksu._personas.dim__rfm_by_product_by_week
